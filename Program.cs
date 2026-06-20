@@ -19,7 +19,7 @@ namespace SistemaJaguarMarket
         }
 
         // 2. VARIABLES GLOBALES Y CONSTANTES
-        const int MAX_STANDS = 100;
+        const int MAX_STANDS = 40;
         static Emprendimiento[] listaMarket = new Emprendimiento[MAX_STANDS];
         static int contadorEmprendimientos = 0;
 
