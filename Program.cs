@@ -6,7 +6,7 @@ namespace SistemaJaguarMarket
     class Program
     {
         // 1. DEFINICIÓN DE ESTRUCTURAS
-    
+
         struct Emprendimiento
         {
             public string CodigoCredencial;
@@ -15,7 +15,7 @@ namespace SistemaJaguarMarket
             public string Categoria;
             public string Telefono;
             public int NumStand;
-            public string Estado; 
+            public string Estado;
         }
 
         // 2. VARIABLES GLOBALES Y CONSTANTES
@@ -26,7 +26,7 @@ namespace SistemaJaguarMarket
         // Mia programará aquí
         static void Main(string[] args)
         {
-        
+
             CargarDatos();
 
             int opcion = 0;
@@ -36,7 +36,7 @@ namespace SistemaJaguarMarket
                 Console.WriteLine("==================================================");
                 Console.WriteLine("        SISTEMA DE GESTIÓN JAGUAR MARKET         ");
                 Console.WriteLine("==================================================");
-                Console.WriteLine("1. Registrar Emprendimiento (Inscripción)");
+                Console.WriteLine("1. Registrar Emprendimiento");
                 Console.WriteLine("2. Mostrar Todos los Emprendimientos Inscritos");
                 Console.WriteLine("3. Buscar Emprendimiento por Nombre");
                 Console.WriteLine("4. Cancelar Inscripción de Emprendimiento");
@@ -45,7 +45,7 @@ namespace SistemaJaguarMarket
                 Console.WriteLine("7. Salir del Sistema");
                 Console.WriteLine("==================================================");
                 Console.Write("Seleccione una opción: ");
-                
+
                 if (int.TryParse(Console.ReadLine(), out opcion))
                 {
                     switch (opcion)
@@ -54,7 +54,7 @@ namespace SistemaJaguarMarket
                         case 2: MostrarInscritos(); break;
                         case 3: BuscarPorNombre(); break;
                         case 4: CancelarInscripcion(); break;
-                        case 5: 
+                        case 5:
                             GuardarDatos();
                             Console.WriteLine("Presione cualquier tecla para continuar...");
                             Console.ReadKey();
@@ -64,9 +64,9 @@ namespace SistemaJaguarMarket
                             GuardarDatos();
                             Console.WriteLine("Saliendo del sistema...");
                             break;
-                        default: 
-                            Console.WriteLine("Opción no válida. Presione Enter."); 
-                            Console.ReadKey(); 
+                        default:
+                            Console.WriteLine("Opción no válida. Presione Enter.");
+                            Console.ReadKey();
                             break;
                     }
                 }
@@ -75,18 +75,29 @@ namespace SistemaJaguarMarket
                     Console.WriteLine("Por favor, introduce un número válido. Presione Enter.");
                     Console.ReadKey();
                 }
-            } while (opcion != 6);
+            } while (opcion != 7);
         }
 
         // Evan programará aquí
-        
+
         static void RegistrarEmprendimiento()
         {
             Console.Clear();
             Console.WriteLine("--- REGISTRAR NUEVO EMPRENDIMIENTO ---");
 
-            // Validación de cupo máximo
-            if (contadorEmprendimientos >= MAX_STANDS)
+            // 1. Buscar si existe algún stand cancelado que podamos reutilizar
+            int indiceDisponible = -1;
+            for (int i = 0; i < contadorEmprendimientos; i++)
+            {
+                if (listaMarket[i].Estado == "Cancelado")
+                {
+                    indiceDisponible = i;
+                    break; // Detenemos la búsqueda al encontrar el primer espacio libre
+                }
+            }
+
+            // 2. Validación de cupo máximo (Solo si no hay cancelados y llegamos a 40)
+            if (indiceDisponible == -1 && contadorEmprendimientos >= MAX_STANDS)
             {
                 Console.WriteLine("Lo sentimos, ya no hay stands disponibles (Límite: " + MAX_STANDS + ").");
                 Console.WriteLine("El emprendimiento pasará a la lista de espera.");
@@ -95,32 +106,44 @@ namespace SistemaJaguarMarket
             }
 
             Emprendimiento nuevo;
-            
-            // Captura de datos
+
+            // 3. Captura de datos
             Console.Write("Nombre del Emprendimiento: ");
             nuevo.NombreNegocio = Console.ReadLine()!;
             Console.Write("Nombre del Representante: ");
             nuevo.Representante = Console.ReadLine()!;
-            Console.Write("Categoría (Comida, Ropa, Accesorios, Tecnología): ");
+            Console.Write("Categoría (Comida, Ropa, Accesorios, Maquillaje, etc.): ");
             nuevo.Categoria = Console.ReadLine()!;
             Console.Write("Número de Teléfono: ");
             nuevo.Telefono = Console.ReadLine()!;
-            
-            // Lógica automatizada propuesta
-            nuevo.NumStand = contadorEmprendimientos + 1; // Asigna el siguiente stand libre
-            nuevo.CodigoCredencial = "JAG-" + nuevo.NumStand.ToString("D3"); // Ejemplo: JAG-001
-            nuevo.Estado = "Confirmado";
 
-            // Guardar en el arreglo
-            listaMarket[contadorEmprendimientos] = nuevo;
-            contadorEmprendimientos++;
+            // 4. Asignación de Stand dependiendo de si es nuevo o reutilizado
+            if (indiceDisponible != -1)
+            {
+                // REUTILIZAR STAND CANCELADO
+                nuevo.NumStand = listaMarket[indiceDisponible].NumStand; // Hereda el número del stand vacío
+                nuevo.CodigoCredencial = "JAG-" + nuevo.NumStand.ToString("D3");
+                nuevo.Estado = "Confirmado";
 
-            Console.WriteLine("\n¡Inscripción Exitosa!");
+                listaMarket[indiceDisponible] = nuevo; // Sobrescribimos el arreglo en esa posición
+                Console.WriteLine("\n¡Inscripción Exitosa (Stand Reasignado)!");
+            }
+            else
+            {
+                // CREAR NUEVO STAND AL FINAL
+                nuevo.NumStand = contadorEmprendimientos + 1;
+                nuevo.CodigoCredencial = "JAG-" + nuevo.NumStand.ToString("D3");
+                nuevo.Estado = "Confirmado";
+
+                listaMarket[contadorEmprendimientos] = nuevo;
+                contadorEmprendimientos++; // Solo aumentamos el contador si es un stand totalmente nuevo
+                Console.WriteLine("\n¡Inscripción Exitosa!");
+            }
+
             Console.WriteLine($"Código Asignado: {nuevo.CodigoCredencial} | Stand: {nuevo.NumStand}");
             Console.WriteLine("Presione cualquier tecla para continuar...");
             Console.ReadKey();
         }
-
         static void MostrarInscritos()
         {
             Console.Clear();
@@ -132,12 +155,24 @@ namespace SistemaJaguarMarket
             }
             else
             {
+                bool hayActivos = false; // Variable extra para saber si todos fueron cancelados
+
                 for (int i = 0; i < contadorEmprendimientos; i++)
                 {
-                    Console.WriteLine($"[{listaMarket[i].CodigoCredencial}] - {listaMarket[i].NombreNegocio}");
-                    Console.WriteLine($"    Resp: {listaMarket[i].Representante} | Cat: {listaMarket[i].Categoria}");
-                    Console.WriteLine($"    Tel: {listaMarket[i].Telefono} | Stand: {listaMarket[i].NumStand} | Estado: {listaMarket[i].Estado}");
-                    Console.WriteLine("------------------------------------------------");
+                    // Solo mostramos los que NO están cancelados
+                    if (listaMarket[i].Estado != "Cancelado")
+                    {
+                        Console.WriteLine($"[{listaMarket[i].CodigoCredencial}] - {listaMarket[i].NombreNegocio}");
+                        Console.WriteLine($"    Resp: {listaMarket[i].Representante} | Cat: {listaMarket[i].Categoria}");
+                        Console.WriteLine($"    Tel: {listaMarket[i].Telefono} | Stand: {listaMarket[i].NumStand} | Estado: {listaMarket[i].Estado}");
+                        Console.WriteLine("------------------------------------------------");
+                        hayActivos = true;
+                    }
+                }
+
+                if (!hayActivos)
+                {
+                    Console.WriteLine("Actualmente no hay emprendimientos activos (todos están cancelados).");
                 }
             }
             Console.WriteLine("Presione cualquier tecla para regresar al menú...");
@@ -152,7 +187,7 @@ namespace SistemaJaguarMarket
             Console.Write("Ingrese el nombre del emprendimiento a buscar: ");
             string buscar = Console.ReadLine()!;
             bool encontrado = false;
-            
+
             for (int i = 0; i < contadorEmprendimientos; i++)
             {
                 if (listaMarket[i].NombreNegocio.ToLower() == buscar.ToLower())
@@ -166,22 +201,23 @@ namespace SistemaJaguarMarket
                     Console.WriteLine("Categoría: " + listaMarket[i].Categoria);
                     Console.WriteLine("Número de teléfono: " + listaMarket[i].Telefono);
                     Console.WriteLine("----------------------------------------");
-                    
+
                     encontrado = true;
+                    break;
                 }
             }
-                        if (encontrado == false)
+            if (encontrado == false)
             {
                 Console.WriteLine("El emprendimiento no se encuentra registrado.");
             }
-            
+
             Console.WriteLine("Presione cualquier tecla para continuar...");
             Console.ReadKey();
         }
 
         // Noraelena programará aquí
-        
-         static void GuardarDatos()
+
+        static void GuardarDatos()
         {
             using (StreamWriter sw = new StreamWriter("datos_emprendimientos.txt"))
             {
