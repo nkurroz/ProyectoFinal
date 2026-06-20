@@ -19,7 +19,7 @@ namespace SistemaJaguarMarket
         }
 
         // 2. VARIABLES GLOBALES Y CONSTANTES
-        const int MAX_STANDS = 40;
+        const int MAX_STANDS = 100;
         static Emprendimiento[] listaMarket = new Emprendimiento[MAX_STANDS];
         static int contadorEmprendimientos = 0;
 
@@ -39,8 +39,10 @@ namespace SistemaJaguarMarket
                 Console.WriteLine("1. Registrar Emprendimiento (Inscripción)");
                 Console.WriteLine("2. Mostrar Todos los Emprendimientos Inscritos");
                 Console.WriteLine("3. Buscar Emprendimiento por Nombre");
-                Console.WriteLine("4. Guardar Información en Archivo");
-                Console.WriteLine("5. Salir del Sistema");
+                Console.WriteLine("4. Cancelar Inscripción de Emprendimiento");
+                Console.WriteLine("5. Guardar Información en Archivo");
+                Console.WriteLine("6. Reiniciar Sistema para Siguiente Evento");
+                Console.WriteLine("7. Salir del Sistema");
                 Console.WriteLine("==================================================");
                 Console.Write("Seleccione una opción: ");
                 
@@ -51,15 +53,16 @@ namespace SistemaJaguarMarket
                         case 1: RegistrarEmprendimiento(); break;
                         case 2: MostrarInscritos(); break;
                         case 3: BuscarPorNombre(); break;
-                        case 4: 
+                        case 4: CancelarInscripcion(); break;
+                        case 5: 
                             GuardarDatos();
                             Console.WriteLine("Presione cualquier tecla para continuar...");
                             Console.ReadKey();
                             break;
-                        case 5: 
-                            // Guardado automático al salir
+                        case 6: ReiniciarSistema(); break;
+                        case 7:
                             GuardarDatos();
-                            Console.WriteLine("¡Éxito en el Jaguar Market! Saliendo..."); 
+                            Console.WriteLine("Saliendo del sistema...");
                             break;
                         default: 
                             Console.WriteLine("Opción no válida. Presione Enter."); 
@@ -72,7 +75,7 @@ namespace SistemaJaguarMarket
                     Console.WriteLine("Por favor, introduce un número válido. Presione Enter.");
                     Console.ReadKey();
                 }
-            } while (opcion != 5);
+            } while (opcion != 6);
         }
 
         // Evan programará aquí
@@ -167,8 +170,7 @@ namespace SistemaJaguarMarket
                     encontrado = true;
                 }
             }
-            
-            if (encontrado == false)
+                        if (encontrado == false)
             {
                 Console.WriteLine("El emprendimiento no se encuentra registrado.");
             }
@@ -179,39 +181,31 @@ namespace SistemaJaguarMarket
 
         // Noraelena programará aquí
         
-        static void GuardarDatos() 
+         static void GuardarDatos()
         {
-            try 
+            using (StreamWriter sw = new StreamWriter("datos_emprendimientos.txt"))
             {
-                using (StreamWriter sw = new StreamWriter("jaguarmarket.txt"))
+                for (int i = 0; i < contadorEmprendimientos; i++)
                 {
-                    for (int i = 0; i < contadorEmprendimientos; i++)
-                    {
-                        Emprendimiento emp = listaMarket[i];
-                        sw.WriteLine($"{emp.CodigoCredencial}|{emp.NombreNegocio}|{emp.Representante}|{emp.Categoria}|{emp.Telefono}|{emp.NumStand}|{emp.Estado}");
-                    }
+                    Emprendimiento emp = listaMarket[i];
+                    sw.WriteLine($"{emp.CodigoCredencial}|{emp.NombreNegocio}|{emp.Representante}|{emp.Categoria}|{emp.Telefono}|{emp.NumStand}|{emp.Estado}");
                 }
-                Console.WriteLine("Datos guardados en el disco duro exitosamente.");
-            }
-            catch (Exception) 
-            {
-                Console.WriteLine("No se pudo guardar la información en el archivo.");
             }
         }
 
         static void CargarDatos()
         {
-            if (File.Exists("jaguarmarket.txt"))
+            if (File.Exists("datos_emprendimientos.txt"))
             {
-                // Reiniciar el contador antes de leer para evitar duplicados
-                contadorEmprendimientos = 0; 
+                // Seguridad 1: Reiniciamos el contador antes de leer para evitar duplicados
+                contadorEmprendimientos = 0;
 
-                using (StreamReader sr = new StreamReader("jaguarmarket.txt"))
+                using (StreamReader sr = new StreamReader("datos_emprendimientos.txt"))
                 {
                     string line;
                     while ((line = sr.ReadLine()!) != null)
                     {
-                        // Si el archivo tiene más registros que el tamaño del arreglo (MAX_STANDS = 50), frenamos el ciclo
+                        // Seguridad 2: Si el archivo tiene más registros que el tamaño del arreglo (MAX_STANDS = 40), frenamos el ciclo
                         if (contadorEmprendimientos >= MAX_STANDS)
                         {
                             Console.WriteLine("Advertencia: Se alcanzó el límite máximo de stands. Algunos datos no se cargaron.");
@@ -236,6 +230,95 @@ namespace SistemaJaguarMarket
                     }
                 }
             }
+        }
+        static void ReiniciarSistema()
+        {
+            Console.Clear();
+            Console.WriteLine("        ¡ADVERTENCIA: REINICIO DEL SISTEMA!         ");
+            Console.WriteLine("********************************************************");
+            Console.WriteLine("Esta opción eliminará TODOS los emprendimientos actuales");
+            Console.WriteLine("para dejar el sistema vacío para el Siguiente Evento.");
+            Console.WriteLine("********************************************************");
+            Console.Write("¿Está COMPLETAMENTE seguro de vaciar el sistema? (S/N): ");
+
+            string respuesta = Console.ReadLine()!.ToUpper();
+
+            if (respuesta == "S")
+            {
+                // 1. Vaciamos la memoria RAM
+                contadorEmprendimientos = 0;
+
+                try
+                {
+                    // 2. Vaciamos el archivo físico en el disco duro
+                    File.WriteAllText("datos_emprendimientos.txt", string.Empty);
+
+                    Console.WriteLine("\n¡Sistema reiniciado con éxito! Todo quedó en 0 para el siguiente Jaguar Market.");
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("\nError al limpiar el archivo, pero la memoria RAM fue reiniciada.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nOperación cancelada. Los datos actuales están a salvo.");
+            }
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
+        }
+        static void CancelarInscripcion()
+        {
+            Console.Clear();
+            Console.WriteLine("--- CANCELAR INSCRIPCIÓN DE EMPRENDIMIENTO ---");
+            Console.Write("Ingrese el Código (ej: JAG-001) o Nombre del negocio a cancelar: ");
+            string busqueda = Console.ReadLine()!.ToLower();
+            bool encontrado = false;
+
+            for (int i = 0; i < contadorEmprendimientos; i++)
+            {
+                // Buscamos coincidencia por código o por nombre
+                if (listaMarket[i].CodigoCredencial.ToLower() == busqueda || listaMarket[i].NombreNegocio.ToLower() == busqueda)
+                {
+                    encontrado = true;
+                    Console.WriteLine($"\n  Emprendimiento Localizado:");
+                    Console.WriteLine($"   Negocio: {listaMarket[i].NombreNegocio}");
+                    Console.WriteLine($"   Representante: {listaMarket[i].Representante}");
+                    Console.WriteLine($"   Stand Actual: {listaMarket[i].NumStand}");
+                    Console.WriteLine($"   Estado Actual: {listaMarket[i].Estado}");
+                    Console.WriteLine("------------------------------------------------");
+
+                    if (listaMarket[i].Estado == "Cancelado")
+                    {
+                        Console.WriteLine("Este emprendimiento ya se encuentra cancelado anteriormente.");
+                        break;
+                    }
+
+                    Console.Write("¿Está seguro de cambiar el estado a CANCELADO? (S/N): ");
+                    if (Console.ReadLine()!.ToUpper() == "S")
+                    {
+                        listaMarket[i].Estado = "Cancelado";
+                        Console.WriteLine("\nEl registro ha sido marcado como 'Cancelado' con éxito.");
+
+                        // Guardado automático para actualizar el archivo .txt inmediatamente
+                        GuardarDatos();
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nOperación anulada. El registro sigue activo.");
+                    }
+                    break;
+                }
+            }
+
+            if (!encontrado)
+            {
+                Console.WriteLine("No se encontró ningún emprendimiento con esos datos.");
+            }
+
+            Console.WriteLine("\nPresione cualquier tecla para continuar...");
+            Console.ReadKey();
         }
     }
 }
