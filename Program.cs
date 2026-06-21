@@ -1,30 +1,62 @@
-static void Main()
+using System;
+
+class Program
 {
-    int opcion;
-
-    do
+    static void Main()
     {
-        Console.WriteLine("\n===== UAM JAGUAR MARKET =====");
-        Console.WriteLine("1. Registrar emprendimiento");
-        Console.WriteLine("2. Salir");
-        Console.Write("Seleccione una opción: ");
+        // Definir el arreglo y su tamaño máximo
+        string[] market = new string[100];
 
-        opcion = int.Parse(Console.ReadLine());
+        int MAX_STANDS = 100;
+        int contadorEmprendimiento = 0;
 
-        switch (opcion)
+        string Emprendimiento;
+        string Propietario;
+        string Categoria;
+        string Telefono;
+        int NumStand;
+        string CodigoCredencial;
+        string Estado;
+
+        if (contadorEmprendimiento >= MAX_STANDS)
         {
-            case 1:
-                RegistrarEmprendimiento();
-                break;
-
-            case 2:
-                Console.WriteLine("Saliendo del sistema...");
-                break;
-
-            default:
-                Console.WriteLine("Opción no válida.");
-                break;
+            Console.WriteLine("Ya no hay stands disponibles :(");
+            Console.WriteLine("El emprendimiento pasará a la lista de espera para el próximo Jaguar Market");
         }
+        else
+        {
+            Console.Write("Ingrese el nombre del emprendimiento: ");
+            Emprendimiento = Console.ReadLine();
 
-    } while (opcion != 2);
+            Console.Write("Ingrese el nombre del propietario del negocio: ");
+            Propietario = Console.ReadLine();
+
+            Console.Write("Ingrese la categoría (Comida, ropa, accesorios, tecnología, maquillaje): ");
+            Categoria = Console.ReadLine();
+
+            Console.Write("Ingrese su número telefónico: ");
+            Telefono = Console.ReadLine();
+
+            // Procesos automáticos
+            NumStand = contadorEmprendimiento + 1;
+            CodigoCredencial = "JAG-" + NumStand;
+            Estado = "Confirmado";
+
+            // Almacenamiento en el arreglo
+            market[contadorEmprendimiento] = Emprendimiento;
+            contadorEmprendimiento++;
+
+            Console.WriteLine("\n¡Inscripción agregada!");
+            Console.WriteLine("Código asignado: " + CodigoCredencial);
+
+            // Mostrar información registrada
+            Console.WriteLine("\n--- Datos registrados ---");
+            Console.WriteLine("Emprendimiento: " + Emprendimiento);
+            Console.WriteLine("Propietario: " + Propietario);
+            Console.WriteLine("Categoría: " + Categoria);
+            Console.WriteLine("Teléfono: " + Telefono);
+            Console.WriteLine("Stand: " + NumStand);
+            Console.WriteLine("Estado: " + Estado);
+        }
+    }
 }
