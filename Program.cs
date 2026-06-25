@@ -5,9 +5,9 @@ class Program
     static void Main()
     {
         // Definir el arreglo y su tamaño máximo
-        string[] market = new string[100];
+        string[] market = new string[40];
 
-        int MAX_STANDS = 100;
+        int MAX_STANDS = 40;
         int contadorEmprendimiento = 0;
 
         string Emprendimiento;
