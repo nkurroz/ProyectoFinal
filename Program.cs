@@ -50,7 +50,7 @@ class Program
             Console.WriteLine("Código asignado: " + CodigoCredencial);
 
             // Mostrar información registrada
-            Console.WriteLine("\n--- Datos registrados ---");
+            Console.WriteLine("\n---- LISTA DE EMPRENDIMIENTOS INSCRITOS ----");
             Console.WriteLine("Emprendimiento: " + Emprendimiento);
             Console.WriteLine("Propietario: " + Propietario);
             Console.WriteLine("Categoría: " + Categoria);
